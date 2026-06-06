@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Painel Fiscal · Brave</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0f14;
+    --surface: #151820;
+    --surface2: #1c2030;
+    --border: rgba(255,255,255,0.07);
+    --border2: rgba(255,255,255,0.12);
+    --text: #e8eaf0;
+    --muted: #7a7f96;
+    --accent: #4ade80;
+    --accent2: #22d3ee;
+    --accent3: #fb923c;
+    --danger: #f87171;
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'IBM Plex Sans', sans-serif;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 2rem;
+    height: 56px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    flex-shrink: 0;
+  }
+  .logo {
+    font-family: var(--mono);
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    color: var(--accent);
+  }
+  .logo span { color: var(--muted); }
+  .header-right { display: flex; align-items: center; gap: 1rem; }
+  .badge-status {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent);
+    background: rgba(74,222,128,0.08);
+    border: 1px solid rgba(74,222,128,0.2);
+    padding: 3px 10px;
+    border-radius: 20px;
+  }
+  nav {
+    display: flex;
+    gap: 0;
+    padding: 0 2rem;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+    overflow-x: auto;
+  }
+  nav button {
+    font-family: var(--sans);
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--muted);
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    padding: 12px 16px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: color .2s, border-color .2s;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+  nav button:hover { color: var(--text); }
+  nav button.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+    font-weight: 500;
+  }
+  nav button svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  main {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1.5rem 2rem;
+  }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+  .section-head { margin-bottom: 1.25rem; }
+  .section-head h2 { font-size: 18px; font-weight: 500; color: var(--text); }
+  .section-head p { font-size: 13px; color: var(--muted); margin-top: 3px; }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.25rem;
+  }
+  .card-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+  .card-value { font-family: var(--mono); font-size: 22px; font-weight: 500; color: var(--text); }
+  .card-delta { font-size: 12px; margin-top: 4px; }
+  .delta-up { color: var(--accent); }
+  .delta-down { color: var(--danger); }
+  .grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 1.25rem; }
+  .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; margin-bottom: 1.25rem; }
+  textarea {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 14px;
+    padding: 12px 14px;
+    resize: vertical;
+    min-height: 100px;
+    outline: none;
+    transition: border-color .2s;
+  }
+  textarea:focus { border-color: var(--border2); }
+  .btn {
+    background: var(--accent);
+    color: #0a1a0f;
+    font-family: var(--sans);
+    font-size: 14px;
+    font-weight: 600;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 20px;
+    cursor: pointer;
+    transition: opacity .15s, transform .1s;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+  }
+  .btn:hover { opacity: .9; }
+  .btn:active { transform: scale(.98); }
+  .btn:disabled { opacity: .4; cursor: not-allowed; }
+  .btn-ghost {
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-family: var(--sans);
+    font-size: 13px;
+    padding: 8px 16px;
+    cursor: pointer;
+    transition: color .2s, border-color .2s;
+  }
+  .btn-ghost:hover { color: var(--text); border-color: var(--border2); }
+  .response-box {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.25rem;
+    font-size: 14px;
+    line-height: 1.7;
+    white-space: pre-wrap;
+    min-height: 80px;
+    color: var(--text);
+  }
+  .response-box.empty { color: var(--muted); font-style: italic; }
+  .response-box.loading { color: var(--muted); }
+  .spinner {
+    display: inline-block;
+    width: 14px; height: 14px;
+    border: 2px solid var(--border2);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin .8s linear infinite;
+    vertical-align: middle;
+    margin-right: 8px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .chat-history {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 1rem;
+    max-height: 420px;
+    overflow-y: auto;
+  }
+  .msg {
+    max-width: 85%;
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-size: 14px;
+    line-height: 1.6;
+    white-space: pre-wrap;
+  }
+  .msg-user { align-self: flex-end; background: rgba(74,222,128,0.1); border: 1px solid rgba(74,222,128,0.2); color: var(--text); }
+  .msg-ai { align-self: flex-start; background: var(--surface2); border: 1px solid var(--border); color: var(--text); }
+  .chat-input-row { display: flex; gap: 8px; align-items: flex-end; }
+  .chat-input-row textarea { min-height: 52px; flex: 1; }
+  select, input[type="text"], input[type="number"] {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 14px;
+    padding: 9px 12px;
+    outline: none;
+    transition: border-color .2s;
+    width: 100%;
+  }
+  select:focus, input:focus { border-color: var(--border2); }
+  option { background: #1c2030; }
+  label { font-size: 13px; color: var(--muted); display: block; margin-bottom: 5px; }
+  .field { margin-bottom: 1rem; }
+  .row-fields { display: flex; gap: 12px; }
+  .row-fields .field { flex: 1; }
+  .kpi-bar { height: 6px; background: var(--surface2); border-radius: 3px; margin-top: 8px; overflow: hidden; }
+  .kpi-bar-fill { height: 100%; border-radius: 3px; transition: width .6s ease; }
+  hr { border: none; border-top: 1px solid var(--border); margin: 1.25rem 0; }
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">BRAVE<span>/</span>FISCAL</div>
+  <div class="header-right"><span class="badge-status">● ONLINE</span></div>
+</header>
+<nav id="nav">
+  <button class="active" data-tab="dashboard" onclick="switchTab('dashboard')">Dashboard</button>
+  <button data-tab="nfe" onclick="switchTab('nfe')">NF-e XML</button>
+  <button data-tab="sped" onclick="switchTab('sped')">SPED</button>
+  <button data-tab="conciliacao" onclick="switchTab('conciliacao')">Conciliação</button>
+  <button data-tab="tributario" onclick="switchTab('tributario')">Tributário</button>
+  <button data-tab="chat" onclick="switchTab('chat')">Chat IA</button>
+</nav>
+<main>
+  <div id="tab-dashboard" class="tab-panel active">
+    <div class="section-head"><h2>Visão Geral</h2><p>KPIs fiscais do período</p></div>
+    <div class="grid-4">
+      <div class="card"><div class="card-label">Faturamento Bruto</div><div class="card-value" id="kpi-fat">R$ 0</div><div class="card-delta delta-up" id="kpi-fat-delta">— informar abaixo</div><div class="kpi-bar"><div class="kpi-bar-fill" id="bar-fat" style="width:0%;background:var(--accent)"></div></div></div>
+      <div class="card"><div class="card-label">ICMS Apurado</div><div class="card-value" id="kpi-icms">R$ 0</div><div class="card-delta" id="kpi-icms-pct" style="color:var(--muted)">0% do faturamento</div><div class="kpi-bar"><div class="kpi-bar-fill" id="bar-icms" style="width:0%;background:var(--accent3)"></div></div></div>
+      <div class="card"><div class="card-label">PIS + COFINS</div><div class="card-value" id="kpi-piscofins">R$ 0</div><div class="card-delta" id="kpi-piscofins-pct" style="color:var(--muted)">0% do faturamento</div><div class="kpi-bar"><div class="kpi-bar-fill" id="bar-piscofins" style="width:0%;background:var(--accent2)"></div></div></div>
+      <div class="card"><div class="card-label">IRPJ + CSLL Est.</div><div class="card-value" id="kpi-irpj">R$ 0</div><div class="card-delta" id="kpi-irpj-pct" style="color:var(--muted)">0% do faturamento</div><div class="kpi-bar"><div class="kpi-bar-fill" id="bar-irpj" style="width:0%;background:#a78bfa"></div></div></div>
+    </div>
+    <div class="card" style="margin-bottom:1.25rem">
+      <div class="card-label" style="margin-bottom:14px">Inserir dados do período</div>
+      <div class="row-fields">
+        <div class="field"><label>Faturamento Bruto (R$)</label><input type="number" id="inp-fat" placeholder="ex: 850000"></div>
+        <div class="field"><label>ICMS (R$)</label><input type="number" id="inp-icms" placeholder="ex: 102000"></div>
+        <div class="field"><label>PIS + COFINS (R$)</label><input type="number" id="inp-piscofins" placeholder="ex: 30600"></div>
+        <div class="field"><label>IRPJ + CSLL (R$)</label><input type="number" id="inp-irpj" placeholder="ex: 34000"></div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:4px">
+        <button class="btn" onclick="calcDashboard()">Calcular KPIs</button>
+        <button class="btn-ghost" onclick="analisarDashboardIA()">Analisar com IA ↗</button>
+      </div>
+    </div>
+    <div class="card-label" style="margin-bottom:8px">Análise IA</div>
+    <div class="response-box empty" id="resp-dashboard">Insira os valores e clique em "Analisar com IA".</div>
+  </div>
+  <div id="tab-nfe" class="tab-panel">
+    <div class="section-head"><h2>Análise de NF-e</h2><p>Cole o XML ou descreva as notas para análise</p></div>
+    <div class="field"><label>Conteúdo XML ou descrição</label><textarea id="nfe-input" rows="8" placeholder="Cole o XML da NF-e ou descreva: CFOP, CST, base de cálculo, ICMS, IPI, PIS, COFINS..."></textarea></div>
+    <div class="field"><label>Tipo de análise</label><select id="nfe-tipo"><option value="geral">Revisão geral (CFOP, CST, tributação)</option><option value="icms">Foco em ICMS</option><option value="ipi">Foco em IPI</option><option value="piscofins">Foco em PIS/COFINS</option><option value="divergencia">Identificar divergências</option></select></div>
+    <button class="btn" onclick="analisarNFe()" id="btn-nfe">Analisar NF-e com IA</button>
+    <hr>
+    <div class="card-label" style="margin-bottom:8px">Resultado</div>
+    <div class="response-box empty" id="resp-nfe">O resultado aparecerá aqui.</div>
+  </div>
+  <div id="tab-sped" class="tab-panel">
+    <div class="section-head"><h2>Análise de SPED</h2><p>ECD, ECF ou EFD</p></div>
+    <div class="field"><label>Tipo de SPED</label><select id="sped-tipo"><option value="EFD-ICMS-IPI">EFD ICMS/IPI</option><option value="EFD-Contribuicoes">EFD Contribuições</option><option value="ECD">ECD</option><option value="ECF">ECF</option></select></div>
+    <div class="field"><label>Registros ou descrição</label><textarea id="sped-input" rows="8" placeholder="Cole registros ou descreva a situação..."></textarea></div>
+    <div class="field"><label>Pergunta</label><textarea id="sped-pergunta" rows="3" placeholder="Ex: Verificar consistência E110/E111..."></textarea></div>
+    <button class="btn" onclick="analisarSPED()" id="btn-sped">Analisar SPED com IA</button>
+    <hr>
+    <div class="card-label" style="margin-bottom:8px">Resultado</div>
+    <div class="response-box empty" id="resp-sped">O resultado aparecerá aqui.</div>
+  </div>
+  <div id="tab-conciliacao" class="tab-panel">
+    <div class="section-head"><h2>Conciliação Contábil</h2><p>Lançamentos vs extrato</p></div>
+    <div class="grid-2">
+      <div class="field"><label>Lançamentos Contábeis</label><textarea id="conc-contabil" rows="10" placeholder="Data | Histórico | Débito | Crédito | Valor"></textarea></div>
+      <div class="field"><label>Extrato / Contrapartida</label><textarea id="conc-extrato" rows="10" placeholder="Data | Descrição | Valor"></textarea></div>
+    </div>
+    <div class="field"><label>Conta / contexto</label><input type="text" id="conc-conta" placeholder="Ex: Conta 1010403001 — Jan a Mai/2026"></div>
+    <button class="btn" onclick="analisarConciliacao()" id="btn-conc">Conciliar com IA</button>
+    <hr>
+    <div class="card-label" style="margin-bottom:8px">Resultado</div>
+    <div class="response-box empty" id="resp-conc">Cole os dados e clique em "Conciliar com IA".</div>
+  </div>
+  <div id="tab-tributario" class="tab-panel">
+    <div class="section-head"><h2>Consulta Tributária</h2><p>IRPJ, CSLL, PIS/COFINS, ICMS, IPI, ISS</p></div>
+    <div class="field"><label>Regime</label><select id="trib-regime"><option value="Lucro Real">Lucro Real</option><option value="Lucro Presumido">Lucro Presumido</option><option value="Simples Nacional">Simples Nacional</option><option value="MEI">MEI</option></select></div>
+    <div class="field"><label>Atividade (opcional)</label><input type="text" id="trib-atividade" placeholder="Ex: Indústria de equipamentos de medição elétrica — Lei da Informática"></div>
+    <div class="field"><label>Dúvida tributária</label><textarea id="trib-pergunta" rows="7" placeholder="Ex: Doação à APAE de Porto Ferreira. Como deduzir no IRPJ Lucro Real?"></textarea></div>
+    <button class="btn" onclick="consultarTributario()" id="btn-trib">Consultar IA</button>
+    <hr>
+    <div class="card-label" style="margin-bottom:8px">Parecer</div>
+    <div class="response-box empty" id="resp-trib">O parecer aparecerá aqui.</div>
+  </div>
+  <div id="tab-chat" class="tab-panel">
+    <div class="section-head"><h2>Chat Fiscal · IA</h2><p>Conversa livre sobre temas fiscais e contábeis</p></div>
+    <div class="chat-history" id="chat-history">
+      <div class="msg msg-ai">Olá! Sou o assistente fiscal da Brave. Pergunte sobre contabilidade, tributos, SPED, NF-e, conciliações...</div>
+    </div>
+    <div class="chat-input-row">
+      <textarea id="chat-input" rows="2" placeholder="Digite sua pergunta fiscal..." onkeydown="chatEnter(event)"></textarea>
+      <button class="btn" onclick="enviarChat()" id="btn-chat">Enviar</button>
+    </div>
+    <p style="font-size:12px;color:var(--muted);margin-top:8px">Ctrl+Enter para enviar</p>
+  </div>
+</main>
+<script>
+const PROXY = '/api/claude';
+const SYSTEM_BASE = `Você é um assistente especialista em contabilidade e fiscal brasileiro. Atua como consultor de uma indústria (Lucro Real, Lei da Informática) e escritório contábil com clientes MEI, Simples Nacional e Lucro Presumido. Domínios: IRPJ, CSLL, PIS/COFINS, ICMS, IPI, ISS, SPED (ECD, ECF, EFD), NF-e (CFOP, CST), CIAP, conciliação contábil, eSocial. Responda de forma técnica, direta e prática em português brasileiro.`;
+let chatMessages = [];
+function switchTab(id) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  document.querySelector(`[data-tab="${id}"]`).classList.add('active');
+}
+async function callClaude(systemExtra, userPrompt, respEl, btnEl) {
+  const system = SYSTEM_BASE + (systemExtra ? '\n' + systemExtra : '');
+  if (btnEl) btnEl.disabled = true;
+  respEl.className = 'response-box loading';
+  respEl.innerHTML = '<span class="spinner"></span>Analisando...';
+  try {
+    const res = await fetch(PROXY, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 2000, system, messages: [{ role: 'user', content: userPrompt }] })
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
+    respEl.className = 'response-box';
+    respEl.textContent = data.content?.map(b => b.text || '').join('') || '(sem resposta)';
+  } catch (err) {
+    respEl.className = 'response-box';
+    respEl.textContent = '❌ Erro: ' + err.message;
+  }
+  if (btnEl) btnEl.disabled = false;
+}
+function fmt(v) { return 'R$ ' + Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 2 }); }
+function calcDashboard() {
+  const fat = parseFloat(document.getElementById('inp-fat').value) || 0;
+  const icms = parseFloat(document.getElementById('inp-icms').value) || 0;
+  const pc = parseFloat(document.getElementById('inp-piscofins').value) || 0;
+  const ir = parseFloat(document.getElementById('inp-irpj').value) || 0;
+  document.getElementById('kpi-fat').textContent = fmt(fat);
+  document.getElementById('kpi-icms').textContent = fmt(icms);
+  document.getElementById('kpi-piscofins').textContent = fmt(pc);
+  document.getElementById('kpi-irpj').textContent = fmt(ir);
+  const pct = (v) => fat > 0 ? ((v/fat)*100).toFixed(1)+'% do faturamento' : '—';
+  document.getElementById('kpi-fat-delta').textContent = 'Base de cálculo informada';
+  document.getElementById('kpi-icms-pct').textContent = pct(icms);
+  document.getElementById('kpi-piscofins-pct').textContent = pct(pc);
+  document.getElementById('kpi-irpj-pct').textContent = pct(ir);
+  document.getElementById('bar-fat').style.width = '100%';
+  document.getElementById('bar-icms').style.width = fat > 0 ? Math.min(100,(icms/fat)*200)+'%' : '0%';
+  document.getElementById('bar-piscofins').style.width = fat > 0 ? Math.min(100,(pc/fat)*200)+'%' : '0%';
+  document.getElementById('bar-irpj').style.width = fat > 0 ? Math.min(100,(ir/fat)*200)+'%' : '0%';
+}
+function analisarDashboardIA() {
+  const fat=document.getElementById('inp-fat').value,icms=document.getElementById('inp-icms').value,pc=document.getElementById('inp-piscofins').value,ir=document.getElementById('inp-irpj').value;
+  if (!fat) { alert('Informe o faturamento.'); return; }
+  calcDashboard();
+  callClaude('', `Analise a carga tributária: Faturamento R$${fat}, ICMS R$${icms}, PIS+COFINS R$${pc}, IRPJ+CSLL R$${ir}. Calcule %, compare com benchmarks industriais Lucro Real, identifique oportunidades de planejamento.`, document.getElementById('resp-dashboard'), null);
+}
+function analisarNFe() {
+  const input=document.getElementById('nfe-input').value.trim(),tipo=document.getElementById('nfe-tipo').value;
+  if (!input) { alert('Informe o XML ou descrição.'); return; }
+  callClaude('Especialista em NF-e, CFOP, CST.', `Análise NF-e foco ${tipo}:\n${input}\n\nIdentifique erros, inconsistências ou riscos fiscais. Sugira correções.`, document.getElementById('resp-nfe'), document.getElementById('btn-nfe'));
+}
+function analisarSPED() {
+  const tipo=document.getElementById('sped-tipo').value,c=document.getElementById('sped-input').value.trim(),p=document.getElementById('sped-pergunta').value.trim();
+  if (!c&&!p) { alert('Informe os registros ou dúvida.'); return; }
+  callClaude(`Especialista em ${tipo}.`, `SPED ${tipo}\nRegistros:\n${c||'(não informado)'}\nPergunta:\n${p||'Análise geral.'}`, document.getElementById('resp-sped'), document.getElementById('btn-sped'));
+}
+function analisarConciliacao() {
+  const c=document.getElementById('conc-contabil').value.trim(),e=document.getElementById('conc-extrato').value.trim(),ct=document.getElementById('conc-conta').value.trim();
+  if (!c&&!e) { alert('Informe ao menos um lado.'); return; }
+  callClaude('Especialista em conciliação contábil, Dynamics 365.', `Conciliação${ct?' — '+ct:''}\nLançamentos:\n${c||'(não informado)'}\nExtrato:\n${e||'(não informado)'}\n\nIdentifique itens que conciliam, pendentes, diferenças. Sugira ajustes e lançamentos de regularização.`, document.getElementById('resp-conc'), document.getElementById('btn-conc'));
+}
+function consultarTributario() {
+  const r=document.getElementById('trib-regime').value,a=document.getElementById('trib-atividade').value.trim(),p=document.getElementById('trib-pergunta').value.trim();
+  if (!p) { alert('Informe a dúvida.'); return; }
+  callClaude(`Consultor ${r}, Lei da Informática.`, `Regime: ${r}${a?'\nAtividade: '+a:''}\nConsulta:\n${p}\n\nEmbase na legislação (RIR, Lei 9.718, 10.637, 10.833, RICMS). Cite artigos. Conclusão prática.`, document.getElementById('resp-trib'), document.getElementById('btn-trib'));
+}
+function chatEnter(e) { if (e.ctrlKey && e.key==='Enter') { e.preventDefault(); enviarChat(); } }
+async function enviarChat() {
+  const input=document.getElementById('chat-input'),text=input.value.trim();
+  if (!text) return;
+  input.value='';
+  const history=document.getElementById('chat-history');
+  const ub=document.createElement('div'); ub.className='msg msg-user'; ub.textContent=text; history.appendChild(ub);
+  const ab=document.createElement('div'); ab.className='msg msg-ai loading'; ab.innerHTML='<span class="spinner"></span>Pensando...'; history.appendChild(ab);
+  history.scrollTop=history.scrollHeight;
+  chatMessages.push({role:'user',content:text});
+  document.getElementById('btn-chat').disabled=true;
+  try {
+    const res=await fetch(PROXY,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:2000,system:SYSTEM_BASE,messages:chatMessages})});
+    const data=await res.json();
+    if (data.error) throw new Error(data.error.message||JSON.stringify(data.error));
+    const reply=data.content?.map(b=>b.text||'').join('')||'(sem resposta)';
+    chatMessages.push({role:'assistant',content:reply});
+    ab.className='msg msg-ai'; ab.textContent=reply;
+  } catch(err) { ab.className='msg msg-ai'; ab.textContent='❌ Erro: '+err.message; }
+  document.getElementById('btn-chat').disabled=false;
+  history.scrollTop=history.scrollHeight;
+}
+</script>
+</body>
+</html>
